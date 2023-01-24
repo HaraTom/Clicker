@@ -43,4 +43,4 @@ print("In the meantime, enjoy your cup of coffee! :)")
 
 os.system(RCU_MENU)
 time.sleep(5)
-anotherPage(cycle_repeats, top_menu, epg_position, programs_back, program_repeats, rails, file_name, userId)
+anotherPage(cycle_repeats, top_menu, epg_position, programs_back, program_repeats, rails, file_name, userId, watch)
