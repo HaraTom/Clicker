@@ -5,15 +5,17 @@ import time
 # CONSTANTS:
 RCU_MENU = "adb shell input keyevent 3"
 RCU_BACK = "adb shell input keyevent 4"
+RCU_NR1 = "adb shell input keyevent 8"
 RCU_UP = "adb shell input keyevent 19"
 RCU_DOWN = "adb shell input keyevent 20"
 RCU_LEFT = "adb shell input keyevent 21"
 RCU_RIGHT = "adb shell input keyevent 22"
 RCU_OK = "adb shell input keyevent 23"
-RCU_NR1 = "adb shell input keyevent 8"
 RCU_CH_PLUS = "adb shell input keyevent 166"
 RCU_CH_MINUS = "adb shell input keyevent 167"
+RCU_LIVETV = "adb shell input keyevent 170"
 RCU_EPG = "adb shell input keyevent 172"
+RCU_PREMIUM = "adb shell input keyevent 174"
 
 RCU_LEFT_LONG = "adb shell input keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21 keyevent 21"
 RCU_RIGHT_LONG = "adb shell input keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22 keyevent 22"
@@ -38,6 +40,7 @@ def channel1():
 
 # Focus all assets in the rail and return to the first position, go to the next rail and repeat - repeat for whole page
 def pageClicker(rails, top_menu, file_name, userId):
+    time.sleep(5)
     memory(file_name, userId)
     for page in range(rails):
         os.system(RCU_RIGHT_LONG) # Click x times right (simulates long press)
@@ -90,11 +93,9 @@ def browse_in_epg():
         os.system(RCU_UP)
 
 # From the default position in EPG go to the left once, open the detail, play the show, return to EPG, open the detail, close the detail - and repeat the whole cycle
-def detail(programs_back, program_repeat):
+def detail(programs_back, program_repeat, watch):
     browse_in_epg()
-    os.system(RCU_MENU)
-    time.sleep(5)
-    os.system(RCU_EPG)
+    os.system(RCU_EPG) # default focus in EPG
     time.sleep(5)
     click_left = 1
     for detail in range(programs_back):
@@ -102,20 +103,12 @@ def detail(programs_back, program_repeat):
             for left in range(click_left):
                 os.system(RCU_LEFT)
             os.system(RCU_OK) # should open the detail page
-            time.sleep(2) # wait 5 seconds to load up the page
+            time.sleep(5) # wait x seconds to load up the page
             os.system(RCU_OK) # play the show
-            time.sleep(10) # watch the show for x seconds
-            os.system(RCU_BACK) # go to the detail
-            os.system(RCU_BACK) # go to EPG
-            os.system(RCU_BACK) # go to default position
-            time.sleep(2)
-            for left in range(click_left):
-                os.system(RCU_LEFT)
-            os.system(RCU_OK) # should open the detail page
-            time.sleep(5) # wait 5 seconds to load up the page
-            os.system(RCU_BACK)
+            time.sleep(watch) # watch the show for x seconds
+            os.system(RCU_EPG) # go to the EPG
+            os.system(RCU_EPG) # default position in EPG
         click_left += 1
-
 #--------
 
 # Relevant for EPG (Vertical)
@@ -162,7 +155,7 @@ def loop_channels(file_name, userId):
 
 # Relevant for Browsing in the App (without EPG - functions above)
 # Move to another section and click in the section
-def anotherPage(cycle_repeats, top_menu, epg_position, programs_back, program_repeats, rails, file_name, userId):
+def anotherPage(cycle_repeats, top_menu, epg_position, programs_back, program_repeats, rails, file_name, userId, watch):
     for loop in range(cycle_repeats):
         to_side = 0
         while to_side <= top_menu:
@@ -172,14 +165,15 @@ def anotherPage(cycle_repeats, top_menu, epg_position, programs_back, program_re
                     os.system(RCU_RIGHT)
                 os.system(RCU_OK)
                 time.sleep(2) # Time to loads up the page
-                detail(programs_back, program_repeats) # Classic EPG clicker
-                print("I will return to the Home page now.")
-                os.system(RCU_BACK) # Return to Home page - default position
-                time.sleep(2)
-                os.system(RCU_BACK) # Focus to Logo
-                time.sleep(2)
-                os.system(RCU_UP) # Focus the asset in the Top menu
+                detail(programs_back, program_repeats, watch) # Classic EPG clicker
+                time.sleep(5)
                 to_side += 1
+                print("I will return to the Home page now.")
+                os.system(RCU_MENU) # Return to Home page - default position
+                time.sleep(5)
+                os.system(RCU_UP)
+                time.sleep(2)
+                os.system(RCU_LEFT)
             elif to_side != epg_position and to_side > 0:
                 if to_side > 1:
                     print("Lets go to another page. ")
@@ -189,7 +183,6 @@ def anotherPage(cycle_repeats, top_menu, epg_position, programs_back, program_re
                 time.sleep(5)
                 print("I will check another page now.")
                 pageClicker(rails, top_menu, file_name, userId)
-                os.system(RCU_OK)
                 time.sleep(5)
                 os.system(RCU_UP)
                 to_side += 1
